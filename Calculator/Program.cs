@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Calculator;
-
-namespace Program;
+﻿namespace Program;
 
 public class Program
 {
