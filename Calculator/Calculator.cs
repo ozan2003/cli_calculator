@@ -4,41 +4,50 @@ namespace Calculator;
 
 public class Calculator
 {
-    private static readonly Dictionary<char, (int priority, string assoc)> @operator = new()
+    private enum Associativity
     {
-        // l = left associavity, r = right associativity
-        {'+', (1,"l")},
-        {'-', (1, "l")},
-        {'*', (2, "l")},
-        {'/', (2, "l")},
-        {'^', (3, "r")},
-    };
+        Left,
+        Right,
+    }
+
+    /// <summary>
+    /// A dictionary that contains the priority and associativity of each operator.
+    /// </summary>
+    private static readonly Dictionary<char, (int priority, Associativity assoc)> @operator =
+        new()
+        {
+            { '+', (1, Associativity.Left) },
+            { '-', (1, Associativity.Left) },
+            { '*', (2, Associativity.Left) },
+            { '/', (2, Associativity.Left) },
+            { '^', (3, Associativity.Right) }, // Not to be confused with xor operator.
+        };
 
     /// <summary>
     /// Check the character is an operator or not.
     /// </summary>
-    /// 
+    ///
     /// <param name="ch">
     /// The character to check.
     /// </param>
-    /// 
+    ///
     /// <returns>
     /// True if the character is an operator, false otherwise.
     /// </returns>
-    private static bool IsOperator(in char ch) =>
-        @operator.ContainsKey(ch);
-
+    ///
+    /// <see cref="@operator"/>
+    private static bool IsOperator(in char ch) => @operator.ContainsKey(ch);
 
     /// <summary>
-    /// Converts the infix expression to postfix notation.
+    /// Returns a postfix (RPN) version of the infix expression.
     /// </summary>
-    /// 
+    ///
     /// <param name="input">
     /// The infix expression to convert.
     /// </param>
-    /// 
+    ///
     /// <returns>
-    /// The postfix notation of the input expression.
+    /// Postfix version of the input expression.
     /// </returns>
     ///
     /// <exception cref="ArgumentException">
@@ -56,8 +65,8 @@ public class Calculator
         }
         // Handle negative numbers at the beginning of the expression.
         infix.Append(string.Concat(input.Where(ch => !char.IsWhiteSpace(ch))));
-
         //---------------------------------------------------------------------------
+
         Stack<char> operator_stack = new();
         StringBuilder postfix = new(infix.Length);
 
@@ -79,35 +88,41 @@ public class Calculator
                 postfix.Append(' ');
                 --i; // Adjust to correct the loop increment.
             }
-            // Handle numbers (negative).
+            // Handle numbers (multi-digit, negative).
             // Whenever '-' comes in string, check if there's a number before it.
             // If not push '0' then push '-'.
             else if (infix[i] == '-' && (i == 0 || infix[i - 1] == '('))
             {
                 postfix.Append("0 ");
                 operator_stack.Push(infix[i]);
-                //operator_stack.Push(@operator['-']);
             }
             // If it's an operator.
             else if (IsOperator(infix[i]))
             {
-                while (operator_stack.Count != 0 && operator_stack.Peek() != '('
+                // While there is an operator of higher or equal precedence than top of the stack,
+                // pop it off the stack and append it to the output.
+                while (
+                    operator_stack.Count != 0
+                    && operator_stack.Peek() != '('
                     && @operator[infix[i]].priority <= @operator[operator_stack.Peek()].priority
-                    && @operator[infix[i]].assoc == "l")
+                    && @operator[infix[i]].assoc == Associativity.Left
+                )
                 {
                     postfix.Append(operator_stack.Pop());
                     postfix.Append(' ');
                 }
                 operator_stack.Push(infix[i]);
             }
-            // Opening parenthesis
+            // Opening parenthesis.
             else if (infix[i] == '(')
             {
                 operator_stack.Push(infix[i]);
             }
-            // Closing parenthesis
+            // Closing parenthesis.
             else if (infix[i] == ')')
             {
+                // Pop operators off the stack and append them to the output,
+                // until the operator at the top of the stack is a opening bracket.
                 while (operator_stack.Count != 0 && operator_stack.Peek() != '(')
                 {
                     postfix.Append(operator_stack.Pop());
@@ -115,11 +130,7 @@ public class Calculator
                 }
                 operator_stack.Pop(); // Remove '(' from stack
             }
-            // Whitespace
-            else if (char.IsWhiteSpace(infix[i]))
-            {
-                continue;
-            }
+            // It is guaranteed that the infix expression doesn't contain whitespaces.
             else
             {
                 throw new ArgumentException(
@@ -141,15 +152,15 @@ public class Calculator
     /// <summary>
     /// Evaluates RPN (Reverse Polish Notation) expression.
     /// </summary>
-    /// 
+    ///
     /// <param name="infix">
     /// The infix expression to evaluate.
     /// </param>
-    /// 
+    ///
     /// <returns>
     /// The result of the expression.
     /// </returns>
-    /// 
+    ///
     /// <exception cref="ArgumentException">
     /// If there are invalid characters in the postfix expression.
     /// i.e. characters other than digits, arithmetic operators, and spaces.
@@ -191,7 +202,7 @@ public class Calculator
                         nums.Push(Math.Pow(first, second));
                         break;
                     default:
-                        break;
+                        throw new ArgumentException($"Unknown operator '{front}'.");
                 }
             }
             else
