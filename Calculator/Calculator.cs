@@ -54,8 +54,9 @@ public class Calculator
     /// If there are invalid characters in the infix expression.
     /// i.e. characters other than digits, arithmetic operators, and parentheses.
     /// </exception>
-    private static string ToPostfix(in string input)
+    private static string ToPostfix(in string infix)
     {
+#if false
         // Remove all whitespaces and convert to a list of characters.
         StringBuilder infix = new(input.Length + 1); // +1 for the possible extra '0' at the beginning.
 
@@ -66,9 +67,11 @@ public class Calculator
         // Handle negative numbers at the beginning of the expression.
         infix.Append(string.Concat(input.Where(ch => !char.IsWhiteSpace(ch))));
         //---------------------------------------------------------------------------
-
+#endif
         Stack<char> operator_stack = new();
         StringBuilder postfix = new(infix.Length);
+        // Previous character in the infix expression. Useful for determining if `-` is binary or unary.
+        char previous_char = '\0'; 
 
         for (int i = 0; i < infix.Length; ++i)
         {
@@ -91,7 +94,8 @@ public class Calculator
             // Handle numbers (multi-digit, negative).
             // Whenever '-' comes in string, check if there's a number before it.
             // If not push '0' then push '-'.
-            else if (infix[i] == '-' && (i == 0 || infix[i - 1] == '('))
+            //else if (infix[i] == '-' && (i == 0 || infix[i - 1] == '(' || IsOperator(infix[i - 1]) || previous_char == '('))
+            else if (infix[i] == '-' && (i == 0 || previous_char == '(' || IsOperator(previous_char)))
             {
                 postfix.Append("0 ");
                 operator_stack.Push(infix[i]);
@@ -101,6 +105,7 @@ public class Calculator
             {
                 // While there is an operator of higher or equal precedence than top of the stack,
                 // pop it off the stack and append it to the output.
+                // Changing the their order will fuck things up, idk why.
                 while (
                     operator_stack.Count != 0
                     && operator_stack.Peek() != '('
@@ -130,13 +135,18 @@ public class Calculator
                 }
                 operator_stack.Pop(); // Remove '(' from stack
             }
-            // It is guaranteed that the infix expression doesn't contain whitespaces.
+            else if (char.IsWhiteSpace(infix[i]))
+            {
+                continue;
+            }
             else
             {
                 throw new ArgumentException(
                     $"Invalid character '{infix[i]}' in the infix expression."
                 );
             }
+
+            previous_char = infix[i];
         }
 
         // Pop any remaining operators
