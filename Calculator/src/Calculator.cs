@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 
 namespace Calculator;
 
@@ -19,7 +19,7 @@ public class Calculator : ICalculator
     /// <summary>
     /// A dictionary that contains the priority and associativity of each operator.
     /// </summary>
-    private static readonly Dictionary<char, (int priority, Associativity assoc)> _operators = new()
+    private static readonly Dictionary<char, (int priority, Associativity assoc)> operators = new()
     {
         { '+', (1, Associativity.Left) },
         { '-', (1, Associativity.Left) },
@@ -100,8 +100,8 @@ public class Calculator : ICalculator
                 while (
                     operatorStack.Count != 0
                     && operatorStack.Peek() != '('
-                    && _operators[infix[i]].priority <= _operators[operatorStack.Peek()].priority
-                    && _operators[infix[i]].assoc == Associativity.Left
+                    && operators[infix[i]].priority <= operators[operatorStack.Peek()].priority
+                    && operators[infix[i]].assoc == Associativity.Left
                 )
                 {
                     postfix.Append(operatorStack.Pop());
