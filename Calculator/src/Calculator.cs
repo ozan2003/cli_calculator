@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 
 namespace Calculator;
 
@@ -31,12 +31,12 @@ public class Calculator : ICalculator
     /// <summary>
     /// Check the character is an operator or not.
     /// </summary>
-    private static bool IsOperator(in char ch) => _operators.ContainsKey(ch);
+    private static bool IsOperator(char ch) => operators.ContainsKey(ch);
 
     /// <summary>
     /// Returns a postfix (RPN) version of the infix expression.
     /// </summary>
-    private static string ToPostfix(in string infix)
+    private static string ToPostfix(ReadOnlySpan<char> infix)
     {
         Stack<char> operatorStack = new();
         StringBuilder postfix = new(infix.Length);
