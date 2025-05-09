@@ -45,16 +45,41 @@ public class Calculator : ICalculator
 
         for (int i = 0; i < infix.Length; ++i)
         {
-            // Handle numbers (multi-digit).
-            if (char.IsDigit(infix[i]))
+            // Handle numbers (multi-digit with decimal points).
+            if (char.IsDigit(infix[i]) || infix[i] == '.')
             {
                 StringBuilder number = new();
+                bool hasDecimalPoint = false;
 
-                // Capture the entire number (multi-digit support)
-                while (i < infix.Length && char.IsDigit(infix[i]))
+                // Capture the entire number (multi-digit with decimal support)
+                while (i < infix.Length && (char.IsDigit(infix[i]) || infix[i] == '.'))
                 {
+                    if (infix[i] == '.')
+                    {
+                        if (hasDecimalPoint)
+                        {
+                            throw new ArgumentException(
+                                $"Multiple decimal points in a number at position {i}"
+                            );
+                        }
+                        hasDecimalPoint = true;
+                    }
                     number.Append(infix[i]);
                     ++i;
+                }
+
+                // Make sure the number has at least one digit
+                if (number.ToString() == ".")
+                {
+                    throw new ArgumentException(
+                        "A decimal point must be followed by at least one digit"
+                    );
+                }
+
+                // Add a leading zero if the number starts with a decimal point
+                if (number.Length > 0 && number[0] == '.')
+                {
+                    number.Insert(0, '0');
                 }
 
                 postfix.Append(number);
@@ -92,8 +117,14 @@ public class Calculator : ICalculator
             // Closing parenthesis.
             else if (infix[i] == ')')
             {
+                // Check if there's a matching opening parenthesis
+                if (operatorStack.Count == 0 || !operatorStack.Contains('('))
+                {
+                    throw new ArgumentException("Unmatched closing parenthesis");
+                }
+
                 // Pop operators off the stack and append them to the output,
-                // until the operator at the top of the stack is a opening bracket.
+                // until the operator at the top of the stack is an opening bracket.
                 while (operatorStack.Count != 0 && operatorStack.Peek() != '(')
                 {
                     postfix.Append(operatorStack.Pop());
@@ -115,6 +146,12 @@ public class Calculator : ICalculator
             previousChar = infix[i];
         }
 
+        // Check for unmatched opening parentheses
+        if (operatorStack.Contains('('))
+        {
+            throw new ArgumentException("Unmatched opening parenthesis");
+        }
+
         // Pop any remaining operators
         while (operatorStack.Count != 0)
         {
@@ -130,27 +167,41 @@ public class Calculator : ICalculator
     /// </summary>
     /// <param name="expression">The expression to calculate</param>
     /// <returns>The result of the calculation</returns>
-    public double Calculate(string expression)
+    public decimal Calculate(string expression)
     {
         if (string.IsNullOrWhiteSpace(expression))
         {
             throw new ArgumentException("Expression cannot be empty");
         }
 
-        Stack<double> nums = new();
+        Stack<decimal> nums = new();
         string postfix = ToPostfix(expression);
 
         foreach (string token in postfix.Split(' '))
         {
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                continue;
+            }
+
             char front = token[0];
 
-            if (char.IsDigit(front) || (front == '-' && token.Length > 1))
+            if (char.IsDigit(front) || front == '.' || (front == '-' && token.Length > 1))
             {
-                nums.Push(Convert.ToDouble(token));
+                if (!decimal.TryParse(token, out decimal value))
+                {
+                    throw new ArgumentException($"Invalid number format: {token}");
+                }
+                nums.Push(value);
             }
             // Do the operation.
-            else if (IsOperator(front) && nums.Count >= 2)
+            else if (IsOperator(front))
             {
+                if (nums.Count < 2)
+                {
+                    throw new ArgumentException($"Not enough operands for operator '{front}'");
+                }
+
                 var second = nums.Pop();
                 var first = nums.Pop();
 
@@ -166,10 +217,16 @@ public class Calculator : ICalculator
                         nums.Push(first * second);
                         break;
                     case '/':
+                        if (second == 0)
+                        {
+                            throw new ArgumentException("Division by zero");
+                        }
                         nums.Push(first / second);
                         break;
                     case '^':
-                        nums.Push(Math.Pow(first, second));
+                        // Since Math.Pow works with doubles, we need to convert
+                        var result = (decimal)Math.Pow((double)first, (double)second);
+                        nums.Push(result);
                         break;
                     default:
                         throw new ArgumentException($"Unknown operator '{front}'.");
@@ -181,6 +238,16 @@ public class Calculator : ICalculator
             }
         }
 
-        return nums.Count > 0 ? nums.Pop() : 0;
+        if (nums.Count == 0)
+        {
+            throw new ArgumentException("The expression did not produce a result");
+        }
+
+        if (nums.Count > 1)
+        {
+            throw new ArgumentException("The expression has too many operands");
+        }
+
+        return nums.Pop();
     }
 }
