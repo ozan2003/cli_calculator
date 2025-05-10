@@ -20,6 +20,7 @@ public class Program
         Console.WriteLine();
         Console.WriteLine("Commands:");
         Console.WriteLine("  help        Display this help message");
+        Console.WriteLine("  cls         Clear the console");
         Console.WriteLine("  exit/quit   Exit the calculator");
         Console.WriteLine();
     }
@@ -51,6 +52,16 @@ public class Program
                     return;
                 case "help":
                     DisplayHelp();
+                    break;
+                case "cls":
+                    try
+                    {
+                        Console.Clear();
+                    }
+                    catch (IOException ioexc)
+                    {
+                        Console.WriteLine($"Error: {ioexc.Message}");
+                    }
                     break;
                 default:
                     try
