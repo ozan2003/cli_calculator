@@ -12,25 +12,11 @@ public class Program
     /// </summary>
     private static void DisplayHelp()
     {
-        Console.WriteLine("Calculator Help");
-        Console.WriteLine("==============");
         Console.WriteLine("Enter a mathematical expression to calculate the result.");
+        Console.WriteLine("Decimal and whole numbers are supported.");
         Console.WriteLine();
-        Console.WriteLine("Supported operations:");
-        Console.WriteLine("  +    Addition");
-        Console.WriteLine("  -    Subtraction");
-        Console.WriteLine("  *    Multiplication");
-        Console.WriteLine("  /    Division");
-        Console.WriteLine("  ^    Exponentiation (power)");
-        Console.WriteLine("  ()   Parentheses for grouping");
-        Console.WriteLine();
-        Console.WriteLine("Examples:");
-        Console.WriteLine("  2 + 3 * 4       = 14");
-        Console.WriteLine("  (2 + 3) * 4     = 20");
-        Console.WriteLine("  2^3 + 10        = 18");
-        Console.WriteLine("  5 / 2           = 2.5");
-        Console.WriteLine("  -5 + 3          = -2");
-        Console.WriteLine("  3.14 * 2        = 6.28");
+        Console.WriteLine("Supported operators:");
+        Console.WriteLine(string.Join(" ", Calculator.operators.Keys));
         Console.WriteLine();
         Console.WriteLine("Commands:");
         Console.WriteLine("  help        Display this help message");
@@ -43,7 +29,7 @@ public class Program
     /// </summary>
     public static void Main()
     {
-        ICalculator calculator = new Calculator();
+        Calculator calculator = new();
 
         Console.WriteLine("Calculator - Type 'help' for usage information");
         Console.WriteLine("Type an expression to calculate or 'exit' to quit.");

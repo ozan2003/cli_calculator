@@ -20,7 +20,7 @@ public partial class Calculator : ICalculator
     /// <summary>
     /// A dictionary that contains the priority and associativity of each operator.
     /// </summary>
-    private static readonly Dictionary<char, (int priority, Associativity assoc)> operators = new()
+    public static readonly Dictionary<char, (int priority, Associativity assoc)> operators = new()
     {
         { '+', (1, Associativity.Left) },
         { '-', (1, Associativity.Left) },
