@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Calculator;
 
@@ -14,7 +15,7 @@ public enum Associativity
 /// <summary>
 /// Main calculator implementation
 /// </summary>
-public class Calculator : ICalculator
+public partial class Calculator : ICalculator
 {
     /// <summary>
     /// A dictionary that contains the priority and associativity of each operator.
@@ -48,6 +49,39 @@ public class Calculator : ICalculator
             );
     }
 
+    [GeneratedRegex(@"^(\d+(\.\d*)?|\.\d+)", RegexOptions.Compiled)]
+    private static partial Regex DecimalPattern();
+
+    /// <summary>
+    /// Regex pattern for matching valid numbers
+    /// </summary>
+    private static readonly Regex NumberRegex = DecimalPattern();
+
+    /// <summary>
+    /// Reads a number from the input string starting at the given index
+    /// </summary>
+    /// <param name="infix">The input expression</param>
+    /// <param name="index">Current position in the expression, updated to last digit position</param>
+    /// <returns>The parsed number as a string</returns>
+    private static string ReadNumber(ReadOnlySpan<char> infix, ref int index)
+    {
+        Match match = NumberRegex.Match(infix[index..].ToString());
+        if (!match.Success)
+        {
+            throw new ArgumentException($"Invalid number format at position {index}");
+        }
+
+        // Handle the leading decimal point case by adding a zero
+        string result = match.Value;
+        if (result.StartsWith('.'))
+        {
+            result = "0" + result;
+        }
+
+        index += match.Length - 1; // Adjust index for loop increment
+        return result;
+    }
+
     /// <summary>
     /// Returns a postfix (RPN) version of the infix expression.
     /// </summary>
@@ -63,43 +97,8 @@ public class Calculator : ICalculator
             // Handle numbers (multi-digit with decimal points).
             if (char.IsDigit(infix[i]) || infix[i] == '.')
             {
-                StringBuilder number = new();
-                bool hasDecimalPoint = false;
-
-                // Capture the entire number (multi-digit with decimal support)
-                while (i < infix.Length && (char.IsDigit(infix[i]) || infix[i] == '.'))
-                {
-                    if (infix[i] == '.')
-                    {
-                        if (hasDecimalPoint)
-                        {
-                            throw new ArgumentException(
-                                $"Multiple decimal points in a number at position {i}"
-                            );
-                        }
-                        hasDecimalPoint = true;
-                    }
-                    number.Append(infix[i]);
-                    ++i;
-                }
-
-                // Make sure the number has at least one digit
-                if (number.ToString() == ".")
-                {
-                    throw new ArgumentException(
-                        "A decimal point must be followed by at least one digit"
-                    );
-                }
-
-                // Add a leading zero if the number starts with a decimal point
-                if (number.Length > 0 && number[0] == '.')
-                {
-                    number.Insert(0, '0');
-                }
-
-                postfix.Append(number);
+                postfix.Append(ReadNumber(infix, ref i));
                 postfix.Append(' ');
-                --i; // Adjust to correct the loop increment.
             }
             // Handle negative numbers
             else if (infix[i] == '-' && (i == 0 || previousChar == '(' || IsOperator(previousChar)))
