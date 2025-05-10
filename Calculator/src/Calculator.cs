@@ -163,19 +163,13 @@ public class Calculator : ICalculator
     }
 
     /// <summary>
-    /// Evaluates a mathematical expression and returns the result
+    /// Evaluates a postfix expression and returns the result
     /// </summary>
-    /// <param name="expression">The expression to calculate</param>
-    /// <returns>The result of the calculation</returns>
-    public decimal Calculate(string expression)
+    /// <param name="postfix">The postfix expression to evaluate</param>
+    /// <returns>The result of the evaluation</returns>
+    private static decimal PostfixEval(string postfix)
     {
-        if (string.IsNullOrWhiteSpace(expression))
-        {
-            throw new ArgumentException("Expression cannot be empty");
-        }
-
         Stack<decimal> nums = new();
-        string postfix = ToPostfix(expression);
 
         foreach (string token in postfix.Split(' '))
         {
@@ -249,5 +243,21 @@ public class Calculator : ICalculator
         }
 
         return nums.Pop();
+    }
+
+    /// <summary>
+    /// Evaluates a mathematical expression and returns the result
+    /// </summary>
+    /// <param name="expression">The expression to calculate</param>
+    /// <returns>The result of the calculation</returns>
+    public decimal Calculate(string expression)
+    {
+        if (string.IsNullOrWhiteSpace(expression))
+        {
+            throw new ArgumentException("Expression cannot be empty");
+        }
+
+        string postfix = ToPostfix(expression);
+        return PostfixEval(postfix);
     }
 }
