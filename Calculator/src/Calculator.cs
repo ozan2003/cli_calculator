@@ -49,7 +49,8 @@ public partial class Calculator : ICalculator
             );
     }
 
-    [GeneratedRegex(@"^(\d+(\.\d*)?|\.\d+)", RegexOptions.Compiled)]
+    // Either a number with a decimal point or a whole number, or a decimal point followed by a number.
+    [GeneratedRegex(@"^(\d+(?:\.\d*)?|\.\d+)", RegexOptions.Compiled)]
     private static partial Regex DecimalPattern();
 
     /// <summary>
