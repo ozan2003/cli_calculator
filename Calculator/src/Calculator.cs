@@ -34,6 +34,21 @@ public class Calculator : ICalculator
     private static bool IsOperator(char ch) => operators.ContainsKey(ch);
 
     /// <summary>
+    /// Check if the operator has higher precedence than the other operator.
+    /// </summary>
+    /// <param name="op1">The first operator.</param>
+    /// <param name="op2">The second operator.</param>
+    /// <returns>True if the first operator has higher precedence, false otherwise.</returns>
+    private static bool HasHigherPrecedence(char op1, char op2)
+    {
+        return operators[op1].priority > operators[op2].priority
+            || (
+                operators[op1].priority == operators[op2].priority
+                && operators[op1].assoc == Associativity.Left
+            );
+    }
+
+    /// <summary>
     /// Returns a postfix (RPN) version of the infix expression.
     /// </summary>
     private static string ToPostfix(ReadOnlySpan<char> infix)
@@ -100,8 +115,7 @@ public class Calculator : ICalculator
                 while (
                     operatorStack.Count != 0
                     && operatorStack.Peek() != '('
-                    && operators[infix[i]].priority <= operators[operatorStack.Peek()].priority
-                    && operators[infix[i]].assoc == Associativity.Left
+                    && HasHigherPrecedence(operatorStack.Peek(), infix[i])
                 )
                 {
                     postfix.Append(operatorStack.Pop());
