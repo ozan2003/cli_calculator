@@ -56,10 +56,7 @@ public class Program
                     try
                     {
                         decimal result = calculator.Calculate(input);
-                        // Format the result to avoid unnecessary decimal places.
-                        string formattedResult =
-                            result % 1 == 0 ? result.ToString("0") : result.ToString();
-                        Console.WriteLine(formattedResult);
+                        Console.WriteLine($"{result:G}");
                     }
                     catch (Exception exc)
                     {
