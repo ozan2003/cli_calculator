@@ -10,5 +10,5 @@ public interface ICalculator
     /// </summary>
     /// <param name="expression">Expression to calculate</param>
     /// <returns>The result of the calculation</returns>
-    decimal Calculate(string expression);
+    decimal Calculate(ReadOnlySpan<char> expression);
 }

@@ -1,6 +1,6 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Text;
 using System.Text.RegularExpressions;
-using System.Globalization;
 
 namespace Calculator;
 
@@ -21,14 +21,15 @@ public partial class Calculator : ICalculator
     /// <summary>
     /// A dictionary that contains the priority and associativity of each operator.
     /// </summary>
-    public static readonly Dictionary<char, (int priority, Associativity assoc)> operators = new()
-    {
-        { '+', (1, Associativity.Left) },
-        { '-', (1, Associativity.Left) },
-        { '*', (2, Associativity.Left) },
-        { '/', (2, Associativity.Left) },
-        { '^', (3, Associativity.Right) }, // Not to be confused with xor operator.
-    };
+    public static readonly Dictionary<char, (int priority, Associativity assoc)> operators =
+        new()
+        {
+            { '+', (1, Associativity.Left) },
+            { '-', (1, Associativity.Left) },
+            { '*', (2, Associativity.Left) },
+            { '/', (2, Associativity.Left) },
+            { '^', (3, Associativity.Right) }, // Not to be confused with xor operator.
+        };
 
     /// <summary>
     /// Check the character is an operator or not.
@@ -182,24 +183,40 @@ public partial class Calculator : ICalculator
     /// </summary>
     /// <param name="postfix">The postfix expression to evaluate</param>
     /// <returns>The result of the evaluation</returns>
-    private static decimal PostfixEval(string postfix)
+    private static decimal PostfixEval(ReadOnlySpan<char> postfix)
     {
         Stack<decimal> nums = new();
 
-        foreach (string token in postfix.Split(' '))
+        foreach (Range token_range in postfix.Split(' '))
         {
-            if (string.IsNullOrWhiteSpace(token))
+            /*if (string.IsNullOrWhiteSpace(token_range))
+            {
+                continue;
+            }*/
+
+            if (postfix[token_range].Length == 0 || postfix[token_range].IsWhiteSpace())
             {
                 continue;
             }
 
-            char front = token[0];
+            //char front = token[0];
+            char front = postfix[token_range][0];
 
-            if (char.IsDigit(front) || front == '.' || (front == '-' && token.Length > 1))
+            if (
+                char.IsDigit(front)
+                || front == '.'
+                || (front == '-' && postfix[token_range].Length > 1)
+            )
             {
-                if (!decimal.TryParse(token, CultureInfo.InvariantCulture, out decimal value))
+                if (
+                    !decimal.TryParse(
+                        postfix[token_range],
+                        CultureInfo.InvariantCulture,
+                        out decimal value
+                    )
+                )
                 {
-                    throw new ArgumentException($"Invalid number format: {token}");
+                    throw new ArgumentException($"Invalid number format: {token_range}");
                 }
                 nums.Push(value);
             }
@@ -243,7 +260,9 @@ public partial class Calculator : ICalculator
             }
             else
             {
-                throw new ArgumentException($"Invalid token '{token}' in the postfix expression.");
+                throw new ArgumentException(
+                    $"Invalid token '{token_range}' in the postfix expression."
+                );
             }
         }
 
@@ -265,9 +284,14 @@ public partial class Calculator : ICalculator
     /// </summary>
     /// <param name="expression">The expression to calculate</param>
     /// <returns>The result of the calculation</returns>
-    public decimal Calculate(string expression)
+    public decimal Calculate(ReadOnlySpan<char> expression)
     {
-        if (string.IsNullOrWhiteSpace(expression))
+        /*if (string.IsNullOrWhiteSpace(expression))
+        {
+            throw new ArgumentException("Expression cannot be empty");
+        }*/
+
+        if (expression.Length == 0 || expression.IsWhiteSpace())
         {
             throw new ArgumentException("Expression cannot be empty");
         }
