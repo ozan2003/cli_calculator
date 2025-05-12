@@ -1,4 +1,6 @@
-﻿namespace Calculator;
+﻿using System.Globalization;
+
+namespace Calculator;
 
 /// <summary>
 /// Entry point for the Calculator application
@@ -67,7 +69,7 @@ public class Program
                     try
                     {
                         decimal result = calculator.Calculate(input);
-                        Console.WriteLine($"{result:G}");
+                        Console.WriteLine(result.ToString("G", CultureInfo.InvariantCulture));
                     }
                     catch (Exception exc)
                     {

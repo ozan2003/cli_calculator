@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
+using System.Globalization;
 
 namespace Calculator;
 
@@ -196,7 +197,7 @@ public partial class Calculator : ICalculator
 
             if (char.IsDigit(front) || front == '.' || (front == '-' && token.Length > 1))
             {
-                if (!decimal.TryParse(token, out decimal value))
+                if (!decimal.TryParse(token, CultureInfo.InvariantCulture, out decimal value))
                 {
                     throw new ArgumentException($"Invalid number format: {token}");
                 }
