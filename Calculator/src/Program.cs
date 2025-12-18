@@ -1,4 +1,6 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
+using System.IO;
 
 namespace Calculator;
 
@@ -7,7 +9,7 @@ namespace Calculator;
 /// </summary>
 public class Program
 {
-    private const string prompt = "> ";
+    private const string Prompt = "> ";
 
     /// <summary>
     /// Displays the help message
@@ -40,7 +42,7 @@ public class Program
 
         while (true)
         {
-            Console.Write(prompt);
+            Console.Write(Prompt);
 
             string input = Console.ReadLine() ?? string.Empty;
             string command = input.Trim().ToLower();

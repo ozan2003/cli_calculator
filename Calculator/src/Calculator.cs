@@ -1,4 +1,6 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -58,7 +60,7 @@ public partial class Calculator : ICalculator
     /// <summary>
     /// Regex pattern for matching valid numbers
     /// </summary>
-    private static readonly Regex NumberRegex = DecimalPattern();
+    private static readonly Regex s_numberRegex = DecimalPattern();
 
     /// <summary>
     /// Reads a number from the input string starting at the given index
@@ -68,7 +70,7 @@ public partial class Calculator : ICalculator
     /// <returns>The parsed number as a string</returns>
     private static string ReadNumber(ReadOnlySpan<char> infix, ref int index)
     {
-        Match match = NumberRegex.Match(infix[index..].ToString());
+        Match match = s_numberRegex.Match(infix[index..].ToString());
         if (!match.Success)
         {
             throw new ArgumentException($"Invalid number format at position {index}");
