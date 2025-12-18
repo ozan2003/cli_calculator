@@ -16,7 +16,9 @@ public class Program
     /// </summary>
     private static void DisplayHelp()
     {
-        Console.WriteLine("Enter a mathematical expression to calculate the result.");
+        Console.WriteLine(
+            "Enter a mathematical expression to calculate the result."
+        );
         Console.WriteLine("Decimal and whole numbers are supported.");
         Console.WriteLine();
         Console.WriteLine("Supported operators:");
@@ -71,7 +73,9 @@ public class Program
                     try
                     {
                         decimal result = calculator.Calculate(input);
-                        Console.WriteLine(result.ToString("G", CultureInfo.InvariantCulture));
+                        Console.WriteLine(
+                            result.ToString("G", CultureInfo.InvariantCulture)
+                        );
                     }
                     catch (Exception exc)
                     {

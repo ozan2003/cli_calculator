@@ -23,15 +23,17 @@ public partial class Calculator : ICalculator
     /// <summary>
     /// A dictionary that contains the priority and associativity of each operator.
     /// </summary>
-    public static readonly Dictionary<char, (int priority, Associativity assoc)> operators =
-        new()
-        {
-            { '+', (1, Associativity.Left) },
-            { '-', (1, Associativity.Left) },
-            { '*', (2, Associativity.Left) },
-            { '/', (2, Associativity.Left) },
-            { '^', (3, Associativity.Right) }, // Not to be confused with xor operator.
-        };
+    public static readonly Dictionary<
+        char,
+        (int priority, Associativity assoc)
+    > operators = new()
+    {
+        { '+', (1, Associativity.Left) },
+        { '-', (1, Associativity.Left) },
+        { '*', (2, Associativity.Left) },
+        { '/', (2, Associativity.Left) },
+        { '^', (3, Associativity.Right) }, // Not to be confused with xor operator.
+    };
 
     /// <summary>
     /// Check the character is an operator or not.
@@ -73,7 +75,9 @@ public partial class Calculator : ICalculator
         Match match = s_numberRegex.Match(infix[index..].ToString());
         if (!match.Success)
         {
-            throw new ArgumentException($"Invalid number format at position {index}");
+            throw new ArgumentException(
+                $"Invalid number format at position {index}"
+            );
         }
 
         // Handle the leading decimal point case by adding a zero
@@ -106,7 +110,10 @@ public partial class Calculator : ICalculator
                 postfix.Append(' ');
             }
             // Handle negative numbers
-            else if (infix[i] == '-' && (i == 0 || previousChar == '(' || IsOperator(previousChar)))
+            else if (
+                infix[i] == '-'
+                && (i == 0 || previousChar == '(' || IsOperator(previousChar))
+            )
             {
                 postfix.Append("0 ");
                 operatorStack.Push(infix[i]);
@@ -138,7 +145,9 @@ public partial class Calculator : ICalculator
                 // Check if there's a matching opening parenthesis
                 if (operatorStack.Count == 0 || !operatorStack.Contains('('))
                 {
-                    throw new ArgumentException("Unmatched closing parenthesis");
+                    throw new ArgumentException(
+                        "Unmatched closing parenthesis"
+                    );
                 }
 
                 // Pop operators off the stack and append them to the output,
@@ -191,12 +200,10 @@ public partial class Calculator : ICalculator
 
         foreach (Range token_range in postfix.Split(' '))
         {
-            /*if (string.IsNullOrWhiteSpace(token_range))
-            {
-                continue;
-            }*/
-
-            if (postfix[token_range].Length == 0 || postfix[token_range].IsWhiteSpace())
+            if (
+                postfix[token_range].Length == 0
+                || postfix[token_range].IsWhiteSpace()
+            )
             {
                 continue;
             }
@@ -218,7 +225,9 @@ public partial class Calculator : ICalculator
                     )
                 )
                 {
-                    throw new ArgumentException($"Invalid number format: {token_range}");
+                    throw new ArgumentException(
+                        $"Invalid number format: {token_range}"
+                    );
                 }
                 nums.Push(value);
             }
@@ -227,7 +236,9 @@ public partial class Calculator : ICalculator
             {
                 if (nums.Count < 2)
                 {
-                    throw new ArgumentException($"Not enough operands for operator '{front}'");
+                    throw new ArgumentException(
+                        $"Not enough operands for operator '{front}'"
+                    );
                 }
 
                 var second = nums.Pop();
@@ -253,11 +264,14 @@ public partial class Calculator : ICalculator
                         break;
                     case '^':
                         // Since Math.Pow works with doubles, we need to convert
-                        var result = (decimal)Math.Pow((double)first, (double)second);
+                        var result = (decimal)
+                            Math.Pow((double)first, (double)second);
                         nums.Push(result);
                         break;
                     default:
-                        throw new ArgumentException($"Unknown operator '{front}'.");
+                        throw new ArgumentException(
+                            $"Unknown operator '{front}'."
+                        );
                 }
             }
             else
@@ -270,7 +284,9 @@ public partial class Calculator : ICalculator
 
         if (nums.Count == 0)
         {
-            throw new ArgumentException("The expression did not produce a result");
+            throw new ArgumentException(
+                "The expression did not produce a result"
+            );
         }
 
         if (nums.Count > 1)
@@ -288,11 +304,6 @@ public partial class Calculator : ICalculator
     /// <returns>The result of the calculation</returns>
     public decimal Calculate(ReadOnlySpan<char> expression)
     {
-        /*if (string.IsNullOrWhiteSpace(expression))
-        {
-            throw new ArgumentException("Expression cannot be empty");
-        }*/
-
         if (expression.Length == 0 || expression.IsWhiteSpace())
         {
             throw new ArgumentException("Expression cannot be empty");
